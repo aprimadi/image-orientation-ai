@@ -1,4 +1,6 @@
 *.pyc
+fabfile.py
 data/
 data-sanitized/
 env/
+saved_models/
