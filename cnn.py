@@ -4,6 +4,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras.preprocessing.image import img_to_array
+from keras.callbacks import ModelCheckpoint
 import numpy as np
 import cv2
 import os
