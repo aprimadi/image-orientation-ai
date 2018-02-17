@@ -21,7 +21,7 @@ def load_data():
     )
     conn.query("""SELECT * FROM images""")
     result = conn.store_result()
-    for i in range(min(result.num_rows(), 5000)):
+    for i in range(result.num_rows()):
         row = result.fetch_row()
         image_id = row[0][0]
         rotation = row[0][1]
