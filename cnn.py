@@ -104,11 +104,17 @@ def main():
     x_train /= 255
     x_test /= 255
 
+    checkpointer = ModelCheckpoint(
+        filepath=os.path.join(save_dir, 'checkpoint.hdf5'),
+        verbose=1,
+        save_best_only=True
+    )
     model.fit(x_train, y_train,
               batch_size=batch_size,
               epochs=epochs,
               validation_data=(x_test, y_test),
-              shuffle=True)
+              shuffle=True,
+              callbacks=[checkpointer])
 
     # Save model and weights
     if not os.path.isdir(save_dir):
