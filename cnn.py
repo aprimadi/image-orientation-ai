@@ -55,7 +55,7 @@ def load_data():
 def main():
     batch_size = 32
     num_classes = 4
-    epochs = 1
+    epochs = 100
     save_dir = os.path.join(os.getcwd(), 'saved_models')
     model_name = 'keras_orientation_trained_model.h5'
 
