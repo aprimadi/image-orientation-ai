@@ -105,6 +105,8 @@ def main():
     x_train /= 255
     x_test /= 255
 
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
     checkpointer = ModelCheckpoint(
         filepath=os.path.join(save_dir, 'checkpoint.hdf5'),
         verbose=1,
@@ -118,8 +120,6 @@ def main():
               callbacks=[checkpointer])
 
     # Save model and weights
-    if not os.path.isdir(save_dir):
-        os.makedirs(save_dir)
     model_path = os.path.join(save_dir, model_name)
     model.save(model_path)
     print('Saved trained model at %s' % model_path)
