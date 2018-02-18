@@ -4,7 +4,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras.preprocessing.image import img_to_array
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 import numpy as np
 import cv2
 import os
@@ -54,7 +54,7 @@ def load_data():
     return ((x_train, y_train), (x_test, y_test))
 
 def main():
-    batch_size = 32
+    batch_size = 128
     num_classes = 4
     epochs = 100
     save_dir = os.path.join(os.getcwd(), 'saved_models')
@@ -93,7 +93,7 @@ def main():
     model.add(Activation('softmax'))
 
     # initiate RMSprop optimizer
-    opt = keras.optimizers.rmsprop(lr=0.00005, decay=1e-7)
+    opt = keras.optimizers.rmsprop(lr=0.00001, decay=1e-8)
 
     # Let's train the model using RMSprop
     model.compile(loss='categorical_crossentropy',
@@ -112,12 +112,13 @@ def main():
         verbose=1,
         save_best_only=True
     )
+    early_stopping = EarlyStopping(monitor='val_loss', patience=2)
     model.fit(x_train, y_train,
               batch_size=batch_size,
               epochs=epochs,
               validation_data=(x_test, y_test),
               shuffle=True,
-              callbacks=[checkpointer])
+              callbacks=[checkpointer, early_stopping])
 
     # Save model and weights
     model_path = os.path.join(save_dir, model_name)
