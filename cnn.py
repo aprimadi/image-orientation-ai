@@ -54,7 +54,7 @@ def load_data():
     return ((x_train, y_train), (x_test, y_test))
 
 def main():
-    batch_size = 128
+    batch_size = 32
     num_classes = 4
     epochs = 100
     save_dir = os.path.join(os.getcwd(), 'saved_models')
@@ -93,7 +93,7 @@ def main():
     model.add(Activation('softmax'))
 
     # initiate RMSprop optimizer
-    opt = keras.optimizers.rmsprop(lr=0.00001, decay=1e-8)
+    opt = keras.optimizers.rmsprop(lr=0.0001, decay=1e-6)
 
     # Let's train the model using RMSprop
     model.compile(loss='categorical_crossentropy',
