@@ -5,10 +5,37 @@ from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras.preprocessing.image import img_to_array
 from keras.callbacks import ModelCheckpoint, EarlyStopping
+from data import DataGenerator
 import numpy as np
 import cv2
 import os
 import MySQLdb
+
+def load_data2():
+    conn = MySQLdb.Connection(
+        host='localhost',
+        user='root',
+        port=3306,
+        db='image_classifier',
+    )
+    conn.query("""SELECT * FROM images""")
+    result = conn.store_result()
+    data = []
+    for i in range(result.num_rows()):
+        row = result.fetch_row()
+        image_id = row[0][0]
+        rotation = int(row[0][1] / 90)
+        data.append((image_id, rotation))
+
+    data = np.array(data)
+
+    # Shuffle data and split 80% 20% for training vs test data
+    indices = np.random.permutation(len(data))
+    split = int(len(data) * 4 / 5)
+    training_idx, test_idx = indices[:split], indices[split:]
+    data_train = data[training_idx]
+    data_test = data[test_idx]
+    return (data_train, data_test)
 
 def load_data():
     x = []
@@ -60,18 +87,20 @@ def main():
     save_dir = os.path.join(os.getcwd(), 'saved_models')
     model_name = 'keras_orientation_trained_model.h5'
 
-    (x_train, y_train), (x_test, y_test) = load_data()
-    print('x_train shape:', x_train.shape)
-    print(x_train.shape[0], 'train samples')
-    print(x_test.shape[0], 'test samples')
+    # (x_train, y_train), (x_test, y_test) = load_data()
+    # print('x_train shape:', x_train.shape)
+    # print(x_train.shape[0], 'train samples')
+    # print(x_test.shape[0], 'test samples')
 
     # Convert class vectors to binary class matrices.
-    y_train = keras.utils.to_categorical(y_train, num_classes)
-    y_test = keras.utils.to_categorical(y_test, num_classes)
+    # y_train = keras.utils.to_categorical(y_train, num_classes)
+    # y_test = keras.utils.to_categorical(y_test, num_classes)
+
+    data_train, data_test = load_data2()
 
     model = Sequential()
     model.add(Conv2D(32, (3, 3), padding='same',
-                     input_shape=x_train.shape[1:]))
+                     input_shape=(128, 128, 3)))
     model.add(Activation('relu'))
     model.add(Conv2D(32, (3, 3)))
     model.add(Activation('relu'))
@@ -107,11 +136,6 @@ def main():
                   optimizer=opt,
                   metrics=['accuracy'])
 
-    x_train = x_train.astype('float32')
-    x_test = x_test.astype('float32')
-    x_train /= 255
-    x_test /= 255
-
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
     checkpointer = ModelCheckpoint(
@@ -120,12 +144,13 @@ def main():
         save_best_only=True
     )
     early_stopping = EarlyStopping(monitor='val_loss', patience=2)
-    model.fit(x_train, y_train,
-              batch_size=batch_size,
-              epochs=epochs,
-              validation_data=(x_test, y_test),
-              shuffle=True,
-              callbacks=[checkpointer, early_stopping])
+    train_generator = DataGenerator(data_train)
+    val_generator = DataGenerator(data_test)
+    model.fit_generator(train_generator.flow(batch_size=batch_size),
+                        epochs=epochs,
+                        validation_data=val_generator.flow(batch_size=batch_size),
+                        shuffle=True,
+                        callbacks=[checkpointer, early_stopping])
 
     # Save model and weights
     model_path = os.path.join(save_dir, model_name)
@@ -133,7 +158,7 @@ def main():
     print('Saved trained model at %s' % model_path)
 
     # Score trained model.
-    scores = model.evaluate(x_test, y_test, verbose=1)
+    scores = model.evaluate_generator(val_generator.flow(batch_size=batch_size))
     print('Test loss:', scores[0])
     print('Test accuracy:', scores[1])
 

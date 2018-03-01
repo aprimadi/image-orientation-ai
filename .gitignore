@@ -1,5 +1,9 @@
 *.pyc
+*.dump
+*.tar.gz
 fabfile.py
+.ipynb_checkpoints/
+.mypy_cache/
 data/
 data-sanitized/
 env/
