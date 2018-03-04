@@ -96,7 +96,7 @@ class NumpyArrayIterator(Iterator):
         img_col_axis = 1
         img_channel_axis = 2
 
-        batch_x = np.zeros(tuple([len(index_array)] + [128, 128, 3]),
+        batch_x = np.zeros(tuple([len(index_array)] + [192, 192, 3]),
                            dtype='float32')
         batch_y = np.zeros((len(index_array), 4), dtype='float32')
         for i, j in enumerate(index_array):
