@@ -18,7 +18,7 @@ def load_data():
     conn.query("""SELECT * FROM images""")
     result = conn.store_result()
     data = []
-    for i in range(min(result.num_rows(), 10000)):
+    for i in range(min(result.num_rows(), 100000)):
         row = result.fetch_row()
         image_id = row[0][0]
         rotation = int(row[0][1] / 90)
@@ -37,7 +37,7 @@ def load_data():
 def main():
     batch_size = 32
     num_classes = 4
-    epochs = 1
+    epochs = 100
     save_dir = os.path.join(os.getcwd(), 'saved_models')
     model_name = 'orientation-inception.h5'
 
